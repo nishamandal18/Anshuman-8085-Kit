@@ -1,7 +1,7 @@
 # Anshuman 8085 Kit Simulator
 A fully functional web-based simulator for the Anshuman 8085 Microprocessor Trainer Kit. This tool allows students and hobbyists to write, execute, and debug 8085 assembly code directly in the browser.
 
-![Anshuman Kit](Anshuman%8085%Kit.jpg)
+![Anshuman Kit](Anshuman%208085%20Kit.jpg)
 
 ## Features: 
 
