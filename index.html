@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anshuman 8085 Trainer Kit</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --kit-aspect-ratio: 900 / 480;
+            --bg-color: #1a1a1a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            padding-top: 80px; 
+            font-family: 'Share Tech Mono', monospace;
+            color: white;
+            user-select: none;
+            overflow-x: hidden; 
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #222;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.7);
+            z-index: 1000;
+            border-bottom: 1px solid #444;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .creator-label {
+            color: #fff;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .action-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(0.8rem, 2.5vw, 14px);
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #b91c1c;
+            white-space: nowrap;
+        }
+        .action-btn:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 0 #b91c1c; }
+        .action-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #b91c1c; }
+
+        /* Responsive Kit Container */
+        .kit-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 15 / 8; 
+            background-color: #2e4e3a; 
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px),
+                url('Anshuman 8085 Simulator.jpg'); 
+            background-size: 20px 20px, 20px 20px, 100% 100%;
+            background-position: center center;
+            background-repeat: repeat, repeat, no-repeat;
+            box-shadow: 0 0 0 8px #222, 0 20px 40px rgba(0,0,0,0.9);
+            border-radius: 12px;
+            overflow: hidden; 
+            margin: 0 auto; 
+        }
+
+        .display-area {
+            position: absolute;
+            top: 12.5%;      
+            left: 10.5%;     
+            width: 74%;    
+            height: 17%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4%;
+            z-index: 20;
+            background-color: #150505; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .digit {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(1.5rem, 8vw, 4.5rem);
+            color: #ff1a1a; 
+            text-shadow: 0 0 5px #ff0000, 0 0 15px #ff0000, 0 0 30px #aa0000;
+            width: 12%;
+            text-align: center;
+            letter-spacing: 0;
+            font-weight: normal;
+            transform: skewX(-10deg);
+            line-height: 1;
+        }
+
+        .keypad-overlay {
+            position: absolute;
+            top: 36%;   
+            left: 6.5%;   
+            width: 87%; 
+            height: 57%; 
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1.5%;
+            padding: 1%;
+            z-index: 30;
+        }
+
+        .key-btn {
+            cursor: pointer;
+            border-radius: 10%;
+            background: #f0f0f0; 
+            color: #cc0000;      
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.6rem, 2.2vw, 1.4rem);
+            font-weight: 700;
+            box-shadow: 0 0.4vw 0 #999, 0 0.6vw 0.4vw rgba(0,0,0,0.4); 
+            transition: all 0.05s ease-out;
+            border: 1px solid #bbb;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+        }
+        
+        .key-btn.active-shf { background: #ffdddd; transform: translateY(2px); box-shadow: 0 0.2vw 0 #999; }
+        
+        .key-btn:active, .key-btn.simulate-press { 
+            transform: translateY(0.4vw); 
+            box-shadow: 0 0 0 #999, inset 0 2px 5px rgba(0,0,0,0.2); 
+            background: #fff; 
+        }
+        
+        .power-led {
+            position: absolute;
+            bottom: 4%;
+            right: 2.5%;
+            width: 1.5%;
+            aspect-ratio: 1/1;
+            background: #ff0000;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff0000, inset 2px 2px 5px rgba(255,255,255,0.5);
+            animation: flicker 0.1s infinite alternate;
+        }
+
+        @keyframes flicker { 0% { opacity: 0.95; } 100% { opacity: 1; } }
+        
+        .help-text { 
+            margin-top: 20px; 
+            color: #ccc; 
+            font-size: clamp(0.7rem, 2.5vw, 14px); 
+            background: rgba(0,0,0,0.9); 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            text-align: center;
+            max-width: 95%;
+            line-height: 1.8;
+            border: 1px solid #444;
+            font-family: 'Share Tech Mono', monospace;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        
+        .help-section {
+            display: block;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 8px;
+        }
+        .help-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            padding-top: 8px;
+            color: #88c0d0; 
+        }
+        .h-title { color: #ef4444; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
+
+        @media (orientation: portrait) { .kit-wrapper { width: 95%; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="creator-label">Made by Nisha Mandal</div>
+        <button class="action-btn" onclick="openNewWindow()">⛶ Open Full Screen Simulator</button>
+    </div>
+
+    <div class="kit-wrapper">
+        <div class="display-area" id="display"></div>
+
+        <div class="keypad-overlay">
+            <div class="key-btn" data-key="0" onclick="press('0')">0</div>
+            <div class="key-btn" data-key="2" onclick="press('2')">2</div>
+            <div class="key-btn" data-key="4" onclick="press('4')">4</div>
+            <div class="key-btn" data-key="7" onclick="press('7')">7</div>
+            <div class="key-btn" data-key="A" onclick="press('A')">A</div>
+            <div class="key-btn" data-key="D" onclick="press('D')">D</div>
+            <div class="key-btn" data-key="M" onclick="press('M')">M</div>
+            <div class="key-btn" data-key="ESC" onclick="press('ESC')">ESC</div>
+
+            <div class="key-btn" data-key="1" onclick="press('1')">1</div>
+            <div class="key-btn" data-key="3" onclick="press('3')">3</div>
+            <div class="key-btn" data-key="5" onclick="press('5')">5</div>
+            <div class="key-btn" data-key="8" onclick="press('8')">8</div>
+            <div class="key-btn" data-key="B" onclick="press('B')">B</div>
+            <div class="key-btn" data-key="E" onclick="press('E')">E</div>
+            <div class="key-btn" data-key="S" onclick="press('S')">S</div>
+            <div class="key-btn" data-key="G" onclick="press('G')">G</div>
+
+            <div class="key-btn" id="btn-shf" data-key="SHF" onclick="press('SHF')">SHF</div>
+            <div class="key-btn" data-key="CNT" onclick="press('CNT')">CNT</div>
+            <div class="key-btn" data-key="6" onclick="press('6')">6</div>
+            <div class="key-btn" data-key="9" onclick="press('9')">9</div>
+            <div class="key-btn" data-key="C" onclick="press('C')">C</div>
+            <div class="key-btn" data-key="F" onclick="press('F')">F</div>
+            <div class="key-btn" data-key="P" onclick="press('P')">P</div>
+            <div class="key-btn" data-key="CR" onclick="press('CR')">CR</div>
+        </div>
+        <div class="power-led"></div>
+    </div>
+
+    <div class="help-text">
+        <div class="help-section">
+            <span class="h-title">KIT RULES:</span> 
+            S+CR+CR &rarr; Address &nbsp;|&nbsp; 
+            G+CR+CR &rarr; Execute &nbsp;|&nbsp; 
+            CR &rarr; Next &nbsp;|&nbsp; 
+            SHF+CR &rarr; Back
+        </div>
+        <div class="help-section">
+            <span class="h-title">KEYBOARD KEYS:</span> 
+            [0-9, A-F] &rarr; Input &nbsp;|&nbsp; 
+            [Enter] &rarr; CR &nbsp;|&nbsp; 
+            [Tab] &rarr; ESC &nbsp;|&nbsp; 
+            [Space] &rarr; CNT &nbsp;|&nbsp; 
+            [Ctrl] &rarr; SHF
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            mode: 'COMMAND', 
+            buffer: '',
+            currentAddr: 0,
+            memory: new Array(65536).fill(0),
+            message: 'CommAnd=',
+            registers: { A:0, B:0, C:0, D:0, E:0, H:0, L:0, PC:0 },
+            shiftActive: false,
+            resultInterval: null 
+        };
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function beep() {
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 2500;
+                osc.type = 'square';
+                gain.gain.value = 0.05;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.05);
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) { }
+        }
+
+        function run8085(startAddr) {
+            let pc = startAddr;
+            let steps = 0;
+            const MAX_STEPS = 1000;
+
+            while(steps < MAX_STEPS) {
+                let opcode = state.memory[pc];
+                pc++;
+
+                switch(opcode) {
+                    case 0x00: break; // NOP
+                    case 0x76: case 0xCF: state.registers.PC = pc; return; // END
+                    case 0x3E: state.registers.A = state.memory[pc++]; break;
+                    case 0x06: state.registers.B = state.memory[pc++]; break;
+                    case 0x0E: state.registers.C = state.memory[pc++]; break;
+                    case 0x16: state.registers.D = state.memory[pc++]; break;
+                    case 0x57: state.registers.D = state.registers.A; break;
+                    case 0x47: state.registers.B = state.registers.A; break;
+                    case 0x78: state.registers.A = state.registers.B; break;
+                    case 0x21: state.registers.L = state.memory[pc++]; state.registers.H = state.memory[pc++]; break;
+                    case 0x32: 
+                        let low = state.memory[pc++];
+                        let high = state.memory[pc++];
+                        state.memory[(high << 8) | low] = state.registers.A;
+                        break;
+                    case 0x7E: state.registers.A = state.memory[(state.registers.H << 8) | state.registers.L]; break;
+                    case 0x77: state.memory[(state.registers.H << 8) | state.registers.L] = state.registers.A; break;
+                    case 0x80: state.registers.A = (state.registers.A + state.registers.B) & 0xFF; break;
+                    case 0x81: state.registers.A = (state.registers.A + state.registers.C) & 0xFF; break;
+                    case 0x86: state.registers.A = (state.registers.A + state.memory[(state.registers.H << 8) | state.registers.L]) & 0xFF; break;
+                    case 0x3C: state.registers.A = (state.registers.A + 1) & 0xFF; break;
+                    case 0x23: 
+                        let hl = (state.registers.H << 8) | state.registers.L;
+                        hl = (hl + 1) & 0xFFFF;
+                        state.registers.H = (hl >> 8) & 0xFF;
+                        state.registers.L = hl & 0xFF;
+                        break;
+                    default: break;
+                }
+                steps++;
+            }
+        }
+
+        function press(key) {
+            beep();
+            
+            if (state.resultInterval) { clearInterval(state.resultInterval); state.resultInterval = null; }
+
+            if (key === 'SHF') {
+                state.shiftActive = !state.shiftActive;
+                const btn = document.getElementById('btn-shf');
+                if(state.shiftActive) btn.classList.add('active-shf');
+                else btn.classList.remove('active-shf');
+                return;
+            }
+
+            if (key === 'ESC') { resetState(); return; }
+
+            // COMMAND MODE
+            if (state.mode === 'COMMAND') {
+                if (key === 'S') { state.mode = 'S_WAIT_1'; state.message = 'Sub-    '; } 
+                else if (key === 'G') { state.mode = 'G_WAIT_1'; state.message = 'Go-     '; }
+                updateDisplay(); return;
+            }
+
+            // --- S WAIT 1 ---
+            if (state.mode === 'S_WAIT_1') {
+                if (key === 'CR') { state.mode = 'S_WAIT_2'; state.message = 'Sub--   '; } 
+                updateDisplay(); return;
+            }
+
+            // --- S WAIT 2 (Check Registers Here) ---
+            if (state.mode === 'S_WAIT_2') {
+                if (key === 'CR') { 
+                    state.mode = 'ADDR_ENTRY'; state.buffer = ''; state.message = 'Addr    '; 
+                }
+                // Correct logic: View Register when in S_WAIT_2
+                else if (['A','B','C','D','E'].includes(key)) {
+                    let val = state.registers[key];
+                    state.message = `Reg ${key} ${val.toString(16).toUpperCase().padStart(2,'0')}`;
+                }
+                updateDisplay(); return;
+            }
+
+            // GO EXECUTE WAITS
+            if (state.mode === 'G_WAIT_1') { if (key === 'CR') { state.mode = 'G_WAIT_2'; state.message = 'Go--    '; } updateDisplay(); return; }
+            if (state.mode === 'G_WAIT_2') { if (key === 'CR') { state.mode = 'GO_ENTRY'; state.buffer = ''; state.message = 'Go Addr '; } updateDisplay(); return; }
+
+            // ADDRESS ENTRY
+            if (state.mode === 'ADDR_ENTRY' || state.mode === 'GO_ENTRY') {
+                if ("0123456789ABCDEF".includes(key)) {
+                    if (state.buffer.length < 4) {
+                        state.buffer += key;
+                        state.message = (state.mode === 'ADDR_ENTRY' ? 'Addr' : 'Go  ') + state.buffer.padStart(4, ' '); 
+                    }
+                } else if (key === 'CR') {
+                    const addr = parseInt(state.buffer, 16) || 0;
+                    state.currentAddr = addr;
+                    if (state.mode === 'GO_ENTRY') {
+                        state.message = 'Exec    '; updateDisplay();
+                        
+                        setTimeout(() => {
+                            run8085(state.currentAddr);
+                            // Auto-flash result
+                            let showAcc = false;
+                            state.resultInterval = setInterval(() => {
+                                if (showAcc) state.message = `A=  ${state.registers.A.toString(16).toUpperCase().padStart(2,'0')}`;
+                                else state.message = 'E ' + state.registers.PC.toString(16).toUpperCase();
+                                updateDisplay();
+                                showAcc = !showAcc;
+                            }, 1500);
+                            state.mode = 'COMMAND';
+                        }, 500);
+                        
+                    } else {
+                        state.mode = 'DATA_VIEW'; state.buffer = ''; refreshMemoryDisplay();
+                    }
+                }
+                updateDisplay(); return;
+            }
+
+            // DATA ENTRY
+            if (state.mode === 'DATA_VIEW') {
+                if ("0123456789ABCDEF".includes(key)) {
+                    state.buffer += key;
+                    if (state.buffer.length > 2) state.buffer = key; 
+                    const addrStr = state.currentAddr.toString(16).toUpperCase().padStart(4, '0');
+                    state.message = addrStr + ' ' + state.buffer.padStart(2, ' ');
+                } else if (key === 'CR') {
+                    if (state.buffer.length > 0) { state.memory[state.currentAddr] = parseInt(state.buffer, 16); state.buffer = ''; }
+                    if (state.shiftActive) { state.currentAddr = (state.currentAddr - 1) & 0xFFFF; state.shiftActive = false; document.getElementById('btn-shf').classList.remove('active-shf'); } 
+                    else { state.currentAddr = (state.currentAddr + 1) & 0xFFFF; }
+                    refreshMemoryDisplay();
+                } 
+                updateDisplay();
+            }
+        }
+
+        function resetState() {
+            if (state.resultInterval) { clearInterval(state.resultInterval); state.resultInterval = null; }
+            state.mode = 'COMMAND'; state.buffer = ''; state.message = 'CommAnd=';
+            state.shiftActive = false; document.getElementById('btn-shf').classList.remove('active-shf');
+            updateDisplay();
+        }
+
+        function refreshMemoryDisplay() {
+            const addrStr = state.currentAddr.toString(16).toUpperCase().padStart(4, '0');
+            const data = state.memory[state.currentAddr] || 0;
+            state.message = addrStr + ' ' + data.toString(16).toUpperCase().padStart(2, '0');
+        }
+
+        function updateDisplay() {
+            const displayEl = document.getElementById('display'); displayEl.innerHTML = '';
+            let text = state.message.padEnd(8, ' ').substring(0, 8);
+            for(let char of text) {
+                const span = document.createElement('span'); span.className = 'digit'; span.innerText = char;
+                if (char === ' ') span.innerHTML = '&nbsp;'; displayEl.appendChild(span);
+            }
+        }
+        
+        // --- Keyboard Handler ---
+        window.addEventListener('keydown', (e) => {
+            if(e.repeat) return; // Avoid key repeat spam
+            
+            // Prevent TAB navigation
+            if (e.key === 'Tab') {
+                e.preventDefault();
+            }
+            
+            const keyMap = {
+                'ENTER': 'CR',
+                'TAB': 'ESC', // TAB key mapped to Reset (ESC)
+                'CONTROL': 'SHF',
+                ' ': 'CNT', // Space for CNT/Next
+            };
+            
+            let k = e.key.toUpperCase();
+            let simKey = keyMap[k] || k;
+            
+            // Validate key matches simulator buttons
+            const validKeys = ['0','1','2','3','4','5','6','7','8','9',
+                               'A','B','C','D','E','F',
+                               'M','G','S','P','CNT','SHF','CR','ESC'];
+            
+            if (validKeys.includes(simKey)) {
+                // 1. Trigger Logic
+                press(simKey);
+                
+                // 2. Visual Feedback
+                const btn = document.querySelector(`.key-btn[data-key="${simKey}"]`);
+                if (btn) {
+                    btn.classList.add('simulate-press');
+                    setTimeout(() => btn.classList.remove('simulate-press'), 150);
+                }
+            }
+        });
+
+        window.openNewWindow = () => {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], {type: 'text/html'});
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank', 'width=1000,height=600');
+        };
+        updateDisplay();
+    </script>
+</body>
+</html>
