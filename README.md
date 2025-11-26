@@ -1,10 +1,8 @@
 # Anshuman 8085 Kit Simulator
-Live link:https://nishamandal18.github.io/Anshuman-8085-Kit/
-
-
+![Anshuman Kit](image_2d7ec2.jpg)
 A fully functional web-based simulator for the Anshuman 8085 Microprocessor Trainer Kit. This tool allows students and hobbyists to write, execute, and debug 8085 assembly code directly in the browser.
 
-🚀 Features
+## Features: 
 
 Realistic Interface: Modeled after the actual Anshuman hardware kit.
 
@@ -16,7 +14,7 @@ Core Instructions: Supports MOV, MVI, ADD, STA, IN, OUT, and more.
 
 Input/Output Ports: Dedicated LED visuals for Output Ports 01 & 02.
 
-🎮 How to Use
+## How to Use
 
 1. Enter a Program
 
@@ -44,7 +42,7 @@ Memory: Press [S] -> [CR] -> [CR] -> Enter Address -> [CR].
 
 Output Ports: Watch the LED indicators at the bottom of the kit.
 
-⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 Kit Button
 
@@ -52,23 +50,12 @@ Keyboard Key
 
 0-9, A-F
 
-0-9, A-F
+CR (Enter) - Enter
 
-CR (Enter)
+ESC (Reset) - Tab
 
-Enter
+CNT (Next) - Spacebar
 
-ESC (Reset)
+SHF (Shift) - Ctrl
 
-Tab
-
-CNT (Next)
-
-Spacebar
-
-SHF (Shift)
-
-Ctrl
-
-![Anshuman Kit](image_2d7ec2.jpg)
 Made by Nisha Mandal
